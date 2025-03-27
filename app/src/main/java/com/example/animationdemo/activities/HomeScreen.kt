@@ -31,7 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.animationdemo.data.Task
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen1(navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()

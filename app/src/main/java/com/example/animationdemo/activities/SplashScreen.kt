@@ -2,6 +2,8 @@ package com.example.animationdemo.activities
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Animatable
@@ -28,17 +30,30 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +78,11 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -222,7 +241,7 @@ fun HomeScreen(navController: NavController) {
 fun AppNavHost(navController: NavHostController) {
     AnimatedNavHost(
         navController = navController,
-        startDestination = "splash",
+        startDestination = "dua_screen",
         enterTransition = {
             slideInHorizontally(
                 initialOffsetX = { it },
@@ -248,6 +267,10 @@ fun AppNavHost(navController: NavHostController) {
             ) + fadeOut(animationSpec = tween(800))
         }
     ) {
+        composable("dua_screen") {
+            val context = LocalContext.current
+            DuaScreen(navController, context)
+        }
         composable("splash") { SplashScreen(navController) }
         composable("home") { HomeScreen(navController) }
         composable("LetterTracingApp") { LetterTracingApp(navController) }
@@ -495,9 +518,11 @@ fun DrawScope.drawTracedPath(touchPoints: List<Offset>, brush: Brush) {
 fun AlphabetScreen(navController: NavController) {
     val letters = ('A'..'Z').toList()
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier
@@ -602,9 +627,11 @@ fun LetterDetailScreen(letter: Char, navController: NavController) {
         }
     }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
 
         IconButton(
             onClick = { navController.popBackStack() },
@@ -711,6 +738,233 @@ fun getLetterImage1(letter: Char): Int {
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DuaScreen(navController: NavController, context: Context) {
+    val duas = listOf(
+        DuaData(
+            title = "Praise and Glory",
+            subtitle = "For Forgiveness of Sins",
+            arabic = "سُبْحَانَ اللّٰہِ وَبِحَمْدِہِ سُبْحَانَ اللّٰہِ الْعَظِیْمِ",
+            translation = "Glory be to Allah and all praise be to Him; Glory be to Allah, the Most Great.",
+            urdu = "پاک ہے اللہ اور اسی کی تعریف ہے ، پاک ہے اللہ عظمت والا۔",
+            reference = "[Ṣaḥīḥ Muslim]",
+            audioResId = R.raw.dua_forgiveness
+        ),
+        DuaData(
+            title = "Tasbeeh Dua",
+            subtitle = "At the beginning of Salah",
+            arabic = "اَللّٰہُ اَکْبَرُکَبِیْرًاوَّالْحَمْدُ لِلّٰہِ کَثِیْرًاوَّسُبْحَانَ اللّٰہِ بُکْرَةً وَّاَصِیْلًا۔ِ",
+            translation = "Allah is truly Great, praise be to Allah in abundance and glory be to Allah in the morning and the evening.",
+            urdu = "اللہ سب سے بڑا ہے ،بہت بڑا اور کثرت سے سب تعریف اللہ ہی کے لیے ہے اور صبح و شام اللہ کی پاکی ہے۔۔",
+            reference = "[Ṣaḥīḥ Muslim]",
+            audioResId = R.raw.glory
+        )
+    )
+
+    val duaTimings = mapOf(
+        R.raw.dua_forgiveness to listOf(
+            WordHighlight("سُبْحَانَ", 0),
+            WordHighlight("اللّٰہِ", 1000),
+            WordHighlight("وَبِحَمْدِہِ", 2000),
+            WordHighlight("سُبْحَانَ", 3000),
+            WordHighlight("اللّٰہِ", 4000),
+            WordHighlight("الْعَظِیْمِ", 5000)
+        )
+    )
+
+    var currentDuaIndex by remember { mutableIntStateOf(0) }
+    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    var currentWord by remember { mutableStateOf("") }
+    var isPlaying by remember { mutableStateOf(false) }
+
+    fun playAudio(audioResId: Int) {
+        mediaPlayer?.release()
+        mediaPlayer = MediaPlayer.create(context, audioResId).apply {
+            start()
+            isPlaying = true
+            setOnCompletionListener {
+                isPlaying = false
+                currentWord = ""
+            }
+        }
+    }
+
+    fun toggleAudio(audioResId: Int) {
+        if (isPlaying) {
+            mediaPlayer?.pause()
+            isPlaying = false
+        } else {
+            mediaPlayer?.release()
+            mediaPlayer = MediaPlayer.create(context, audioResId).apply {
+                start()
+                isPlaying = true
+                setOnCompletionListener {
+                    isPlaying = false
+                    currentWord = ""
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        while (isPlaying) {
+            val currentPosition = mediaPlayer?.currentPosition ?: 0
+            duaTimings[duas[currentDuaIndex].audioResId]?.let { words ->
+                val word = words.lastOrNull { it.startTime <= currentPosition }?.word
+                if (word != null) currentWord = word
+            }
+            delay(300)
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Dua Screen", fontWeight = FontWeight.Bold) },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFEFEFEF))
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.Yellow.copy(alpha = 0.3f))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.dua),
+                    contentDescription = "Dua Image",
+                    modifier = Modifier.size(300.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.elevatedCardElevation(4.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(duas[currentDuaIndex].title, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(duas[currentDuaIndex].subtitle, fontSize = 14.sp, color = Color.Gray)
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+                    Text(
+                        buildAnnotatedString {
+                            duas[currentDuaIndex].arabic.split(" ").forEach { word ->
+                                if (word == currentWord) {
+                                    withStyle(style = SpanStyle(color = Color.Red, fontWeight = FontWeight.Bold)) {
+                                        append("$word ")
+                                    }
+                                } else {
+                                    append("$word ")
+                                }
+                            }
+                        },
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(duas[currentDuaIndex].translation, fontSize = 14.sp, textAlign = TextAlign.Center, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(duas[currentDuaIndex].urdu, fontSize = 14.sp, textAlign = TextAlign.Center, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(duas[currentDuaIndex].reference, fontSize = 12.sp, color = Color.Gray)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+
+                    Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                        IconButton(onClick = { playAudio(duas[currentDuaIndex].audioResId) }) {
+                            Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite")
+                        }
+
+                        IconButton(onClick = { toggleAudio(duas[currentDuaIndex].audioResId) }) {
+                            Icon(
+                                painter = painterResource(
+                                    id = if (isPlaying) R.drawable.baseline_pause_circle_outline_24 else R.drawable.baseline_play_circle_outline_24
+                                ),
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                modifier = Modifier.size(30.dp),
+                                tint = Color.Unspecified
+                            )
+                        }
+
+                        IconButton(onClick = { }) {
+                            Icon(Icons.Default.Refresh, contentDescription = "Repeat")
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    mediaPlayer?.release()
+                    currentDuaIndex = (currentDuaIndex + 1) % duas.size
+                    currentWord = ""
+                    isPlaying = false
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(Color.Gray)
+            ) {
+                Text("Next", color = Color.White)
+            }
+        }
+    }
+}
+
+data class WordHighlight(
+    val word: String,
+    val startTime: Int
+)
+
+
+data class DuaData(
+    val title: String,
+    val subtitle: String,
+    val arabic:String,
+//    val arabicWords: List<String>,
+//    val wordTimestamps: List<Int>,
+    val translation: String,
+    val urdu: String,
+    val reference: String,
+    val audioResId: Int
+)
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewDuaScreen() {
+    val fakeContext = LocalContext.current
+    DuaScreen(navController = rememberNavController(), context = fakeContext)
+}
 
 @Preview(showBackground = true)
 @Composable

@@ -162,7 +162,7 @@ fun SplashScreen(onFinished: () -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.app_logo),
+                    painter = painterResource(id = R.drawable.logo),
                     contentDescription = "Logo",
                     modifier = Modifier.size(150.dp)
                 )
@@ -171,19 +171,19 @@ fun SplashScreen(onFinished: () -> Unit) {
             Spacer(modifier = Modifier.height(26.dp))
 
             Text(
-                text = "Dua App",
+                text = "Dua Land",
                 fontSize = 24.sp,
                 fontFamily = poppinsFamily,
                 fontWeight = FontWeight.Medium,
-                color = Color.White
+                color =colorResource(R.color.splash_black),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Duas Made Easy for Kids!",
+                text = "Growing Hearts with Duas",
                 fontSize = 16.sp,
-                color = Color.White,
+                color =colorResource(R.color.splash_black),
                 fontFamily = poppinsFamily,
                 fontWeight = FontWeight.Medium,
             )
@@ -278,58 +278,20 @@ fun LearnWithEaseScreen(navController: NavController) {
 
 @Composable
 fun Header() {
-    val itimRegular = FontFamily(Font(R.font.itim_regular, FontWeight.Medium))
-    val interRegular = FontFamily(Font(R.font.inter_ui_regular, FontWeight.Normal))
-
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp),
         contentAlignment = Alignment.Center
     ) {
-        Box(
+        Image(
+            painter = painterResource(id = R.drawable.ic_dualand),
+            contentDescription = "Header Image",
             modifier = Modifier
-                .offset(x = 16.dp, y = 16.dp)
-                .size(width = 278.dp, height = 187.dp)
-                .background(Color(0xFFD7D7D7), RoundedCornerShape(28.dp))
+                .fillMaxWidth()
+                .height(150.dp),
+            contentScale = ContentScale.Crop
         )
-        Box(
-            modifier = Modifier
-                .offset(x = 8.dp, y = 8.dp)
-                .size(width = 278.dp, height = 187.dp)
-                .background(Color(0xFFECECEC), RoundedCornerShape(28.dp))
-        )
-        Box(
-            modifier = Modifier
-                .size(width = 278.dp, height = 187.dp)
-                .background(Color(0xFFFFF176), RoundedCornerShape(28.dp))
-                .padding(26.dp)
-        ) {
-            Column {
-                Text(
-                    text = " Learn \n With \n Ease",
-                    fontSize = 40.sp,
-                    color = Color.White,
-                    fontFamily = itimRegular,
-                    fontWeight = FontWeight.Medium,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(142.dp)
-                    .align(Alignment.TopEnd)
-                    .offset(x = 56.dp, y = (-1).dp)
-                    .background(Color.White, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Icon\nAccording to\nthe quote",
-                    fontSize = 16.sp,
-                    color = colorResource(R.color.grey),
-                    fontFamily = interRegular,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
     }
 }
 

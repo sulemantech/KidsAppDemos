@@ -5,7 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
@@ -30,81 +32,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.animationdemo.R
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
-data class Dua(
-    val arabic: String,
-    val translation: String,
-    val reference: String,
-    val backgroundResId: Int,
-    val statusBarColorResId: Int,
-    val fullAudioResId: Int,
-    val wordAudioPairs: List<Pair<String, Int>>
-)
+import kotlin.math.max
 
 @Composable
 fun DuaScreen(
     index: Int,
-    navController: NavController,
-    onMenuClick: () -> Unit = {},
-    onRightIconClick: () -> Unit = {}
+    navController: NavController
 ) {
     val systemUiController = rememberSystemUiController()
     val context = LocalContext.current
 
-    val duas = listOf(
-        Dua(
-            arabic = "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِث",
-            translation = "Glory is to Allah and praise is to Him...",
-            reference = "[Sahih Muslim]",
-            backgroundResId = R.drawable.framewashroom_bg,
-            statusBarColorResId = R.color.top_nav2,
-            fullAudioResId = R.raw.audio1,
-            wordAudioPairs = listOf(
-                "اللَّهُمِ" to R.raw.audio1,
-                "إِنِّي" to R.raw.audio2,
-                "أَعُوذُ بِكَ" to R.raw.audio3,
-                "مِنَ الْخُبُثِ" to R.raw.audio4,
-                "وَالْخَبَائِث" to R.raw.audio5,
-            )
-        ),
-        Dua(
-            arabic = "اللّهُـمَّ باعِـدْ بَيْني وَبَيْنَ خَطاياي",
-            translation = "O Allah, distance me from my sins...",
-            reference = "[Sahih Muslim]",
-            backgroundResId = R.drawable.framebeforedress_bg,
-            statusBarColorResId = R.color.top_nav1,
-            fullAudioResId = R.raw.audio2,
-            wordAudioPairs = listOf(
-                "اللّهُـمَّ" to R.raw.audio5,
-                "باعِـدْ" to R.raw.audio2,
-                "بَيْنيَ" to R.raw.audio3,
-                "وَبَيْنَ" to R.raw.audio4,
-                "خَطاياي" to R.raw.audio5,
-            )
-
-        ),
-        Dua(
-            arabic = "سُبْحَانَ اللّٰہِ وَبِحَمْدِہِ سُبْحَانَ اللّٰہِ الْعَظِیْمِ",
-            translation = "O Allah, distance me from my sins...",
-            reference = "[Sahih Muslim]",
-            backgroundResId = R.drawable.framebeforedress_bg,
-            statusBarColorResId = R.color.top_nav1,
-            fullAudioResId = R.raw.audio2,
-            wordAudioPairs = listOf(
-                "سُبْحَانَ اللّٰہ" to R.raw.audioo1,
-                "وَبِحَمْدِہ" to R.raw.audioo2,
-                "سُبْحَانَ اللّٰہِ الْعَظِیْمِ " to R.raw.audioo3,
-            )
-
-        ),
-
-        )
+    val duas = duaList
 
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
-    val currentDua = duas[currentIndex]
-    val backgroundColor = colorResource(id = currentDua.statusBarColorResId)
-
-    var playingWordIndex by remember { mutableStateOf(-1) }
+    val backgroundColor = colorResource(id = R.color.top_nav)
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
 
     SideEffect {
@@ -117,36 +58,23 @@ fun DuaScreen(
         }
     }
 
-    fun playWord(index: Int) {
-        if (index >= currentDua.wordAudioPairs.size) return
-        val (word, audioResId) = currentDua.wordAudioPairs[index]
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(context, audioResId)
-        playingWordIndex = index
-        mediaPlayer?.setOnCompletionListener {
-            if (index + 1 < currentDua.wordAudioPairs.size) {
-                playWord(index + 1)
-            } else {
-                playingWordIndex = -1
-            }
-        }
-        mediaPlayer?.start()
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = currentDua.backgroundResId),
+            painter = painterResource(id = duas[currentIndex].backgroundResId),
             contentDescription = null,
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize()
         )
 
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                .padding(bottom = 60.dp)
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Top Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -154,138 +82,212 @@ fun DuaScreen(
             ) {
                 IconButton(onClick = { navController.popBackStack() }) {
                     Image(
-                        painter = painterResource(id = R.drawable.icon_back),
+                        painter = painterResource(id = R.drawable.ic_homeasset),
                         contentDescription = "Back",
                         modifier = Modifier.size(35.dp)
                     )
                 }
 
-                IconButton(onClick = onRightIconClick) {
+                Text(
+                    text = "Praise and Glory",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                )
+
+                IconButton(onClick = {
+                    navController.navigate("SettingsScreen")
+                }) {
                     Image(
-                        painter = painterResource(id = R.drawable.setting),
+                        painter = painterResource(id = R.drawable.ic_setting),
                         contentDescription = "Settings",
                         modifier = Modifier.size(35.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(410.dp))
+            Spacer(modifier = Modifier.height(390.dp))
 
-            Row(
+            val showCount = if (currentIndex < 4) 2 else 1
+
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .height(250.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                currentDua.wordAudioPairs.reversed().forEachIndexed { reverseIndex, pair ->
-                    val actualIndex = currentDua.wordAudioPairs.lastIndex - reverseIndex
-                    Text(
-                        text = "${pair.first} ",
-                        fontSize = 22.sp,
-                        fontFamily = FontFamily.Serif,
-                        style = TextStyle(
-                            textDirection = TextDirection.ContentOrRtl,
-                            color = if (playingWordIndex == actualIndex) Color.Blue else colorResource(
-                                R.color.dark_blue
-                            ),
-                            fontWeight = if (playingWordIndex == actualIndex) FontWeight.Bold else FontWeight.Normal
-                        ),
+                for (i in currentIndex until (currentIndex + showCount).coerceAtMost(duas.size)) {
+                    val dua = duas[i]
+                    var wordIndex by remember { mutableStateOf(-1) }
+
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 1.dp)
-                            .clickable(enabled = playingWordIndex == -1) {
-                                playWord(actualIndex)
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        IconButton(onClick = {
+                            mediaPlayer?.release()
+                            mediaPlayer = MediaPlayer.create(context, dua.fullAudioResId)
+                            mediaPlayer?.setOnCompletionListener { wordIndex = -1 }
+                            mediaPlayer?.start()
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_replay),
+                                contentDescription = "Play Full",
+                                modifier = Modifier.size(39.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(5.dp))
+
+                        IconButton(onClick = {
+                            fun playWord(index: Int) {
+                                if (index >= dua.wordAudioPairs.size) {
+                                    wordIndex = -1
+                                    return
+                                }
+                                val (_, audioResId) = dua.wordAudioPairs[index]
+                                mediaPlayer?.release()
+                                mediaPlayer = MediaPlayer.create(context, audioResId)
+                                wordIndex = index
+                                mediaPlayer?.setOnCompletionListener {
+                                    playWord(index + 1)
+                                }
+                                mediaPlayer?.start()
                             }
-                    )
+                            playWord(0)
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.icon_playy),
+                                contentDescription = "Play Word-by-Word",
+                                modifier = Modifier.size(39.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(5.dp))
+
+                        IconButton(onClick = {
+                            fun playWord(index: Int) {
+                                if (index >= dua.wordAudioPairs.size) {
+                                    wordIndex = -1
+                                    return
+                                }
+                                val (_, audioResId) = dua.wordAudioPairs[index]
+                                mediaPlayer?.release()
+                                mediaPlayer = MediaPlayer.create(context, audioResId)
+                                wordIndex = index
+                                mediaPlayer?.setOnCompletionListener {
+                                    playWord(index + 1)
+                                }
+                                mediaPlayer?.start()
+                            }
+                            playWord(0)
+                        }) {
+                            Image(
+                                painter = painterResource(id = R.drawable.ic_starr),
+                                contentDescription = "Play Word-by-Word",
+                                modifier = Modifier.size(39.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 6.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        dua.wordAudioPairs.reversed().forEachIndexed { revIndex, pair ->
+                            val actualIndex = dua.wordAudioPairs.lastIndex - revIndex
+                            Text(
+                                text = "${pair.first} ",
+                                fontSize = 22.sp,
+                                fontFamily = FontFamily.Serif,
+                                style = TextStyle(
+                                    textDirection = TextDirection.ContentOrRtl,
+                                    color = if (wordIndex == actualIndex) Color.Blue else colorResource(
+                                        R.color.dark_blue
+                                    ),
+                                    fontWeight = if (wordIndex == actualIndex) FontWeight.Bold else FontWeight.Normal
+                                ),
+                                modifier = Modifier
+                                    .padding(horizontal = 1.dp)
+                                    .clickable(enabled = wordIndex == -1) {
+                                        mediaPlayer?.release()
+                                        mediaPlayer = MediaPlayer.create(context, pair.second)
+                                        wordIndex = actualIndex
+                                        mediaPlayer?.setOnCompletionListener {
+                                            wordIndex = -1
+                                        }
+                                        mediaPlayer?.start()
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = dua.translation,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
+
+                        Text(
+                            text = dua.reference,
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(80.dp))
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = currentDua.translation,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Center
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = currentDua.reference,
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
         }
-
-        Box(
+        Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 65.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(0.7f)
-            ) {
-                IconButton(onClick = {
-                    mediaPlayer?.release()
-                    mediaPlayer = MediaPlayer.create(context, currentDua.fullAudioResId)
-                    mediaPlayer?.setOnCompletionListener {
-                        playingWordIndex = -1
-                    }
-                    mediaPlayer?.start()
-                }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_previous),
-                        contentDescription = "Previous",
-                        modifier = Modifier.size(39.dp)
-                    )
-                }
-
-                IconButton(onClick = {
-                    playWord(0)
-                }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_sound),
-                        contentDescription = "Sound",
-                        modifier = Modifier.size(39.dp)
-                    )
-                }
-
-                IconButton(onClick = {
-                    currentIndex = (currentIndex + 1) % duas.size
-                    mediaPlayer?.release()
-                    playingWordIndex = -1
-                }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_play),
-                        contentDescription = "Next",
-                        modifier = Modifier.size(39.dp)
-                    )
-                }
+            IconButton(onClick = {
+                val step = if (currentIndex < 4) 2 else 1
+                currentIndex = if (currentIndex - step < 0) 0 else currentIndex - step
+                mediaPlayer?.release()
+            }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_backarrow),
+                    contentDescription = "Previous Dua",
+                    modifier = Modifier.size(35.dp)
+                )
             }
-        }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .clickable {
-                    mediaPlayer?.release()
-                    navController.popBackStack()
-                }
-        ) {
-            Image(
-                painter = painterResource(R.drawable.button_bg),
-                contentDescription = "Quit",
-                modifier = Modifier
-                    .width(100.dp)
-                    .height(40.dp)
-            )
+            IconButton(onClick = {
+                val step = if (currentIndex < 4) 2 else 1
+                currentIndex =
+                    if (currentIndex + step >= duas.size) 0 else currentIndex + step
+                mediaPlayer?.release()
+            }) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_nextarrow),
+                    contentDescription = "Next Dua",
+                    modifier = Modifier.size(39.dp)
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -448,6 +450,7 @@ fun SettingsScreen(navController: NavController) {
 fun SettingsScreenPreview() {
     SettingsScreen(navController = rememberNavController())
 }
+
 @Preview(showBackground = true)
 @Composable
 fun DuaScreenPreview() {

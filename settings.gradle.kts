@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AnimationDemo"
+rootProject.name = "KidsDuaApp"
 include(":app")
  

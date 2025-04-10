@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.play.services.gcm)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.volley)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -89,6 +90,11 @@ dependencies {
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
+
+    implementation( "com.google.accompanist:accompanist-flowlayout:0.30.1")
+
+
 }
 
 fun kapt(s: String) {

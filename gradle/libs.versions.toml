@@ -15,6 +15,7 @@ pagingCommonAndroid = "3.3.6"
 roomCommon = "2.6.1"
 playServicesGcm = "17.0.0"
 runtimeLivedata = "1.7.8"
+volley = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,7 @@ androidx-paging-common-android = { group = "androidx.paging", name = "paging-com
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 play-services-gcm = { group = "com.google.android.gms", name = "play-services-gcm", version.ref = "playServicesGcm" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+volley = { group = "com.android.volley", name = "volley", version.ref = "volley" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -26,14 +27,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.animationdemo.R
+import com.google.accompanist.flowlayout.FlowRow
+import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlin.math.max
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DuaScreen(
     index: Int,
@@ -45,11 +50,15 @@ fun DuaScreen(
     val duas = duaList
 
     var currentIndex by remember { mutableStateOf(index.coerceIn(0, duas.lastIndex)) }
-    val backgroundColor = colorResource(id = R.color.top_nav)
+    val backgroundColor = colorResource(id = R.color.top_nav1)
+    val NavigationBarColor = colorResource(id = R.color.splash_bg)
     var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
+    val statusBarColor = colorResource(id = duas[currentIndex].statusBarColorResId)
 
     SideEffect {
-        systemUiController.setStatusBarColor(color = backgroundColor)
+        systemUiController.setStatusBarColor(color = statusBarColor)
+        systemUiController.setNavigationBarColor(color = NavigationBarColor)
+
     }
 
     DisposableEffect(Unit) {
@@ -65,7 +74,6 @@ fun DuaScreen(
             contentScale = ContentScale.FillBounds,
             modifier = Modifier.fillMaxSize()
         )
-
 
         Column(
             modifier = Modifier
@@ -106,13 +114,13 @@ fun DuaScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(390.dp))
+            Spacer(modifier = Modifier.height(295.dp))
 
             val showCount = if (currentIndex < 4) 2 else 1
 
             Column(
                 modifier = Modifier
-                    .height(250.dp)
+                    .height(310.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 for (i in currentIndex until (currentIndex + showCount).coerceAtMost(duas.size)) {
@@ -122,7 +130,7 @@ fun DuaScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 5.dp),
+                            .padding(top = 20.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         IconButton(onClick = {
@@ -137,8 +145,6 @@ fun DuaScreen(
                                 modifier = Modifier.size(39.dp)
                             )
                         }
-
-                        Spacer(modifier = Modifier.width(5.dp))
 
                         IconButton(onClick = {
                             fun playWord(index: Int) {
@@ -163,7 +169,6 @@ fun DuaScreen(
                                 modifier = Modifier.size(39.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(5.dp))
 
                         IconButton(onClick = {
                             fun playWord(index: Int) {
@@ -192,39 +197,42 @@ fun DuaScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 6.dp),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        dua.wordAudioPairs.reversed().forEachIndexed { revIndex, pair ->
-                            val actualIndex = dua.wordAudioPairs.lastIndex - revIndex
-                            Text(
-                                text = "${pair.first} ",
-                                fontSize = 22.sp,
-                                fontFamily = FontFamily.Serif,
-                                style = TextStyle(
-                                    textDirection = TextDirection.ContentOrRtl,
-                                    color = if (wordIndex == actualIndex) Color.Blue else colorResource(
-                                        R.color.dark_blue
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        FlowRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp),
+                            mainAxisSpacing = 6.dp,
+                            crossAxisSpacing = 8.dp,
+                            mainAxisAlignment = FlowMainAxisAlignment.Center
+                        ) {
+                            dua.wordAudioPairs.forEachIndexed { index, pair ->
+                                Text(
+                                    text = pair.first,
+                                    fontSize = 22.sp,
+                                    fontFamily = FontFamily.Serif,
+                                    style = TextStyle(
+                                        textDirection = TextDirection.ContentOrRtl,
+                                        color = if (wordIndex == index) Color.Blue else colorResource(
+                                            R.color.dark_blue
+                                        ),
+                                        fontWeight = if (wordIndex == index) FontWeight.Bold else FontWeight.Normal
                                     ),
-                                    fontWeight = if (wordIndex == actualIndex) FontWeight.Bold else FontWeight.Normal
-                                ),
-                                modifier = Modifier
-                                    .padding(horizontal = 1.dp)
-                                    .clickable(enabled = wordIndex == -1) {
-                                        mediaPlayer?.release()
-                                        mediaPlayer = MediaPlayer.create(context, pair.second)
-                                        wordIndex = actualIndex
-                                        mediaPlayer?.setOnCompletionListener {
-                                            wordIndex = -1
+                                    modifier = Modifier
+                                        .clickable(enabled = wordIndex == -1) {
+                                            mediaPlayer?.release()
+                                            mediaPlayer = MediaPlayer.create(context, pair.second)
+                                            wordIndex = index
+                                            mediaPlayer?.setOnCompletionListener {
+                                                wordIndex = -1
+                                            }
+                                            mediaPlayer?.start()
                                         }
-                                        mediaPlayer?.start()
-                                    }
-                            )
+                                )
+                            }
                         }
                     }
+
 
                     Spacer(modifier = Modifier.height(10.dp))
 
@@ -247,7 +255,7 @@ fun DuaScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(80.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
 

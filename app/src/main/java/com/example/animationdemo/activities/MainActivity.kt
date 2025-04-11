@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
@@ -122,22 +123,16 @@ fun PlaceholderScreen(title: String) {
     }
 }
 
-    @Composable
+@Composable
 fun SplashScreen(onFinished: () -> Unit) {
     val systemUiController = rememberSystemUiController()
     val backgroundColor = colorResource(id = R.color.splash_bg)
 
+
     SideEffect {
         systemUiController.setStatusBarColor(color = backgroundColor)
+        systemUiController.setNavigationBarColor(color = backgroundColor)
     }
-    val poppins = FontFamily(Font(R.font.inter_ui_regular))
-
-    val poppinsFamily = FontFamily(
-        Font(R.font.inter_ui_regular, FontWeight.Normal),
-        Font(R.font.inter_ui_medium, FontWeight.Medium),
-        Font(R.font.inter_ui_bold, FontWeight.Bold)
-    )
-
 
     LaunchedEffect(true) {
         delay(2000)
@@ -147,58 +142,17 @@ fun SplashScreen(onFinished: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(R.color.splash_bg)),
-        contentAlignment = Alignment.Center
+
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(150.dp)
-                    .border(2.dp, Color.Gray, RoundedCornerShape(4.8.dp))
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(150.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(26.dp))
-
-            Text(
-                text = "Dua Land",
-                fontSize = 24.sp,
-                fontFamily = poppinsFamily,
-                fontWeight = FontWeight.Medium,
-                color =colorResource(R.color.splash_black),
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "Growing Hearts with Duas",
-                fontSize = 16.sp,
-                color =colorResource(R.color.splash_black),
-                fontFamily = poppinsFamily,
-                fontWeight = FontWeight.Medium,
-            )
-
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CircularProgressIndicator(
-                color = Color.LightGray,
-                strokeWidth = 4.dp,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+        Image(
+            painter = painterResource(id = R.drawable.splash_screen),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
+
 @Composable
 fun MainScreen(navController: NavController) {
     Scaffold(
@@ -225,12 +179,12 @@ data class DuaItem(
 @Composable
 fun LearnWithEaseScreen(navController: NavController) {
     val systemUiController = rememberSystemUiController()
-    val backgroundColor = colorResource(id = R.color.blue_bg)
+    val backgroundColor = colorResource(id = R.color.splash_bg)
 
     SideEffect {
         systemUiController.setStatusBarColor(color = backgroundColor)
+        systemUiController.setNavigationBarColor(color = backgroundColor)
     }
-
 
     val duaList = (0 until 21).map { index ->
         val drawableName = if (index == 0) "card" else "card${index + 1}"
@@ -244,56 +198,48 @@ fun LearnWithEaseScreen(navController: NavController) {
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        CustomTopBar(
-            onMenuClick = { },
-            onRightIconClick = { }
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        Image(
+            painter = painterResource(id = R.drawable.dashboard_bg),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.blue_bg))
-                .padding(16.dp),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item(span = { GridItemSpan(2) }) {
-                Header()
-            }
+        Column(modifier = Modifier.fillMaxSize()) {
+            CustomTopBar(
+                onMenuClick = { },
+                onRightIconClick = { }
+            )
 
-            item(span = { GridItemSpan(2) }) {
-                Spacer(modifier = Modifier.height(44.dp))
-            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item(span = { GridItemSpan(2) }) {
+                    // Header()
+                }
 
-            items(duaList) { dua ->
-                DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
+                item(span = { GridItemSpan(2) }) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                items(duaList) { dua ->
+                    DuaCard(imageRes = dua.imageRes, onClick = dua.onClick)
+                }
             }
+            Spacer(modifier = Modifier.height(44.dp))
+
         }
     }
 }
 
-
-@Composable
-fun Header() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(150.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_dualand),
-            contentDescription = "Header Image",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(150.dp),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
 
 @Composable
 fun DuaCard(
@@ -338,7 +284,7 @@ fun CustomBottomNavigationBar(
         Row(
             modifier = Modifier
                 .fillMaxSize(),
-                //.padding(horizontal = 4.dp),
+            //.padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -349,7 +295,8 @@ fun CustomBottomNavigationBar(
         }
     }
 }
- //
+
+//
 @Composable
 fun NavIcon(@DrawableRes iconRes: Int, onClick: () -> Unit) {
     Box(
@@ -372,31 +319,179 @@ fun CustomTopBar(
     onMenuClick: () -> Unit,
     onRightIconClick: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .background(colorResource(R.color.blue_bg))
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(top = 25.dp, end = 16.dp)
     ) {
-        IconButton(onClick = onMenuClick) {
+        IconButton(
+            onClick = onRightIconClick,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(40.dp)
+        ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_menu),
-                contentDescription = "Menu",
-                modifier = Modifier.size(30.dp)
-            )
-        }
-
-        IconButton(onClick = onRightIconClick) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_bookmark),
-                contentDescription = "Notification",
-                modifier = Modifier.size(30.dp)
+                painter = painterResource(id = R.drawable.ic_setting),
+                contentDescription = "Settings",
+                modifier = Modifier.size(40.dp)
             )
         }
     }
+}
+
+
+@Composable
+fun DuaLandDashboardScreen(navController: NavController, onRightIconClick: () -> Unit) {
+    val systemUiController = rememberSystemUiController()
+    val backgroundColor = colorResource(id = R.color.splash_bg)
+
+    SideEffect {
+        systemUiController.setStatusBarColor(color = backgroundColor)
+        systemUiController.setNavigationBarColor(color = backgroundColor)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        // Background Image
+        Image(
+            painter = painterResource(id = R.drawable.dashboard_bg), // Your 2nd image
+            contentDescription = "Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 20.dp, end = 8.dp)
+        ) {
+            IconButton(
+                onClick = onRightIconClick,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(40.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_setting),
+                    contentDescription = "Settings",
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+            }
+
+            Spacer(modifier = Modifier.height(124.dp))
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                items(6) { index ->
+                    val duaTitles = listOf(
+                        "Praise and Glory",
+                        "Peace and Blessing upon the Prophet Muhammad",
+                        "Du’a of Morning",
+                        "Du’a of Evening",
+                        "Before Sleeping",
+                        "After Waking Up"
+                    )
+
+                    val duaImages = listOf(
+                        R.drawable.kaaba,
+                        R.drawable.kaaba,
+                        R.drawable.kaaba,
+                        R.drawable.kaaba,
+                        R.drawable.kaaba,
+                        R.drawable.kaaba,
+
+                        )
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clickable {
+
+                            },
+                        elevation = CardDefaults.cardElevation(8.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+
+                        ) {
+                            Image(
+                                painter = painterResource(id = duaImages[index]),
+                                contentDescription = duaTitles[index],
+                                modifier = Modifier
+                                    .height(170.dp)
+                            )
+                            Spacer(modifier = Modifier.height(18.dp))
+                            Text(
+                                text = duaTitles[index],
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                fontSize = 14.sp,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val icons = listOf(
+                    R.drawable.setting,
+                    R.drawable.icon_home,
+                    R.drawable.icon_playy
+                )
+
+                icons.forEachIndexed { index, iconRes ->
+                    IconButton(onClick = { /* Navigate */ }) {
+                        Image(
+                            painter = painterResource(id = iconRes),
+                            contentDescription = null,
+                            modifier = Modifier.size(44.dp)
+                        )
+                    }
+
+                    if (index < icons.lastIndex) {
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun DuaLandDashboardScreenPreview() {
+    DuaLandDashboardScreen(navController = rememberNavController(), onRightIconClick = {})
 }
 
 @Preview(showBackground = true)

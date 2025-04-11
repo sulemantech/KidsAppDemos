@@ -93,7 +93,7 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.32.0")
 
     implementation( "com.google.accompanist:accompanist-flowlayout:0.30.1")
-
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.34.0")
 
 }
 
